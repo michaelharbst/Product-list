@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class Menus
 {
@@ -12,9 +13,10 @@ public class Menus
         Console.WriteLine("2. View Products");
         Console.WriteLine("3. Search Product");
         Console.WriteLine("4. Delete Product");
-        Console.WriteLine("5. Exit");
+        Console.WriteLine("5. Stastistics");
+        Console.WriteLine("6. Exit");
         Console.WriteLine();
-        Console.WriteLine("press 1-5: ");
+        Console.WriteLine("press 1-6: ");
 
         int.TryParse(Console.ReadKey(intercept: true).KeyChar.ToString(), out int menuChoice);
 
@@ -33,11 +35,35 @@ public class Menus
                 DeleteProducts(products);
                 break;
             case 5:
+                Stastistics(products);
+                break;
+            case 6:
                 exitProgram(products);
                 break;
             default:
                 break;
         }
+    }
+
+    private static void Stastistics(List<string> products)
+    {
+        Console.WriteLine("Total products: " + products.Count());
+        int[] productNumbers = new int[products.Count()];
+        int i = 0;
+        foreach (string product in products)
+        {
+            string[] parts = product.Split('-');
+            productNumbers[i] = int.Parse(parts[1]);
+            i++;
+        }
+
+        Console.WriteLine("Highest product number: " + productNumbers.Max());
+        Console.WriteLine("Lowest product number: " + productNumbers.Min());
+        Console.WriteLine("Average product number: " + productNumbers.Average());
+
+        Console.WriteLine("Press a key to return to the menu");
+        Console.ReadKey();
+        startMenu(products);
     }
 
     static void exitProgram(List<string> products)
@@ -49,20 +75,48 @@ public class Menus
             Environment.Exit(0);
         }
         startMenu(products);
-
-
     }
 
     static void DeleteProducts(List<string> products)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Enter product to delete: ");
+        var deleteProduct = Console.ReadLine();
+        bool isDeleted = products.Remove(deleteProduct.Trim());
+        if (isDeleted)
+        {
+            Console.WriteLine("Product is deleted");
+        }
+        else
+        {
+            Console.WriteLine("Product was not in the database");
+        }
+        Console.WriteLine("Press a key to return to the menu");
+        Console.ReadKey();
+        startMenu(products);
     }
 
     static void searchProducts(List<string> products)
     {
-        throw new NotImplementedException();
-    }
+        Console.WriteLine("Search by product name or number: ");
+        string searchString = Console.ReadLine();
 
+        products.Contains(searchString);
+        Console.WriteLine();
+        Console.WriteLine("Found products");
+        foreach (string product in products)
+        {
+            string[] parts = product.Split('-');
+            if (parts.Contains(searchString))
+            {
+                Console.WriteLine(product);
+            }
+        }
+
+        Console.WriteLine("Press a key to return to the menu");
+        Console.ReadKey();
+
+        startMenu(products);
+    }
 
     static void enterProducts(List<string> products)
     {
@@ -101,14 +155,13 @@ public class Menus
 
     static void errorHandling(string product)
     {
-        //Console.BackgroundColor = ConsoleColor.Green;
         if (product == "") Console.WriteLine("Product cannot be empty.");
         if (!product.Contains('-'))
             Console.WriteLine("Product must contain a dash");
         else
         {
             string[] parts = product.Split('-');
-            string leftSidePattern = @"^[A-Z]";
+            string leftSidePattern = @"^[A-Z]+$";
             string rightSidePattern = @"([2-4][0-9]{2}|500)$";
             bool leftSideOK = Regex.IsMatch(parts[0], leftSidePattern, RegexOptions.IgnoreCase);
             bool rightSideOK = Regex.IsMatch(parts[1], rightSidePattern);
@@ -128,7 +181,6 @@ public class Menus
             }
         }
     }
-
 
 
     static void viewProducts(List<string> products)
